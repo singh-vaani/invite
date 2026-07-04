@@ -940,7 +940,7 @@ function fillGuest(data){
 
 async function loadInvite(){
   if(!state.token){
-    setStatus('This invite link is missing a token. Please open the personal link sent by the host.', true);
+    setStatus('Please open the personal link sent by the host.', true);
     return;
   }
   setStatus('Finding your invitation...');
