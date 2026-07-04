@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vaani Invite Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--lilac:#a993c9;--lilac-deep:#7d64a8;--rose:#e6a3ba;--rose-deep:#c4547a;--ink:#4a3b47;--cream:#fffaf5;--line:rgba(125,100,168,.25)}
+*{box-sizing:border-box} body{margin:0;font-family:Poppins,sans-serif;color:var(--ink);background:linear-gradient(180deg,#f3e9f2,#fdeee0 280px,#fff 280px)}
+header{padding:42px 6vw 24px;text-align:center} h1{font-family:'Playfair Display',serif;color:var(--lilac-deep);font-size:clamp(2rem,6vw,3.6rem);margin:.2rem 0} .sub{color:var(--rose-deep);font-weight:600;letter-spacing:.18em;text-transform:uppercase;font-size:.72rem}
+main{max-width:1120px;margin:0 auto;padding:0 16px 48px}.card{background:var(--cream);border:1px solid var(--line);border-radius:24px;box-shadow:0 24px 54px rgba(125,80,110,.12);padding:22px;margin:16px 0}.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.controls input{padding:12px 14px;border:1.5px solid var(--line);border-radius:14px;font:inherit;min-width:260px}.btn{border:0;border-radius:999px;padding:12px 18px;background:var(--rose-deep);color:#fff;font-weight:700;cursor:pointer}.btn.secondary{background:#fff;color:var(--lilac-deep);border:1.5px solid var(--lilac-deep)}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}@media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}}.kpi{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;text-align:center}.kpi .num{font-size:1.8rem;font-weight:800;color:var(--rose-deep)}.kpi .label{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--lilac-deep);font-weight:700}.status{margin-top:10px;font-size:.9rem}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;background:#fff;border-radius:16px;overflow:hidden}th,td{padding:10px 12px;border-bottom:1px solid var(--line);font-size:.86rem;text-align:left;white-space:nowrap}th{background:#f8edf4;color:var(--lilac-deep);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em}tr:hover td{background:#fff7fb}.search{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:14px;font:inherit;margin-bottom:12px}.badge{display:inline-block;border-radius:999px;padding:4px 9px;font-weight:700;font-size:.75rem}.yes{background:#e8f6ee;color:#1f7a43}.no{background:#fdebed;color:#9b2f2f}.pending{background:#f4effb;color:#6f56a3}
+</style>
+</head>
+<body>
+<header><div class="sub">Host Dashboard</div><h1>Vaani Invite Admin</h1><p>Private RSVP summary from Google Sheets</p></header>
+<main>
+  <section class="card">
+    <div class="controls">
+      <input type="password" id="adminKey" placeholder="Admin key from config.js" />
+      <button class="btn" id="loadBtn">Load Dashboard</button>
+      <button class="btn secondary" id="csvBtn" disabled>Download CSV</button>
+    </div>
+    <div class="status" id="status"></div>
+  </section>
+  <section class="grid" id="kpis"></section>
+  <section class="card">
+    <input class="search" id="search" placeholder="Search by name, phone, RSVP, token..." />
+    <div class="table-wrap"><table id="guestTable"></table></div>
+  </section>
+</main>
+<script src="config.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
