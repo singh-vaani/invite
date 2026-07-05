@@ -869,6 +869,8 @@ END:VCALENDAR`;
 
 /* ---------- Private Google Sheet API via Apps Script JSONP ---------- */
 const state = { token: new URLSearchParams(window.location.search).get('token') || '', guest: null, attending: 'yes' };
+const GUEST_CACHE_PREFIX = 'vaaniInviteGuest:';
+const GUEST_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 function setStatus(message, isError=false){
   const el = document.getElementById('inviteStatus');
@@ -903,6 +905,36 @@ function callApi(params){
     script.src = url.toString();
     document.body.appendChild(script);
   });
+}
+
+function guestCacheKey(token){
+  return GUEST_CACHE_PREFIX + String(token || '').trim();
+}
+
+function getCachedGuest(token){
+  try{
+    const raw = localStorage.getItem(guestCacheKey(token));
+    if(!raw) return null;
+    const cached = JSON.parse(raw);
+    if(!cached || cached.token !== token || !cached.guest) return null;
+    if(Date.now() - Number(cached.savedAt || 0) > GUEST_CACHE_TTL_MS) return null;
+    return cached.guest;
+  }catch(_err){
+    return null;
+  }
+}
+
+function saveCachedGuest(token, guest){
+  try{
+    if(!token || !guest) return;
+    localStorage.setItem(guestCacheKey(token), JSON.stringify({
+      token,
+      guest,
+      savedAt: Date.now()
+    }));
+  }catch(_err){
+    /* Private browsing or storage limits should not block RSVP. */
+  }
 }
 
 function setAttending(value){
@@ -945,16 +977,27 @@ async function loadInvite(){
     setStatus('Please open the personal link sent by the host.', true);
     return;
   }
-  setStatus('Finding your invitation...');
+  const cachedGuest = getCachedGuest(state.token);
+  if(cachedGuest){
+    fillGuest({ guest: cachedGuest });
+    setStatus('Loaded your saved invitation. Refreshing latest RSVP...');
+  } else {
+    setStatus('Finding your invitation...');
+  }
   try{
     const data = await callApi({ action:'get', token: state.token });
     if(!data.ok){
-      setStatus(data.error || 'This invitation link is invalid.', true);
+      if(!cachedGuest) setStatus(data.error || 'This invitation link is invalid.', true);
       return;
     }
+    saveCachedGuest(state.token, data.guest);
     fillGuest(data);
   }catch(err){
-    setStatus(err.message || 'Could not load invitation right now.', true);
+    if(cachedGuest){
+      setStatus('Showing your saved invitation. Latest RSVP could not refresh right now.', true);
+    } else {
+      setStatus(err.message || 'Could not load invitation right now.', true);
+    }
   }
 }
 
@@ -977,6 +1020,15 @@ document.getElementById('rsvpForm').addEventListener('submit', async function(e)
       message: msg
     });
     if(!data.ok) throw new Error(data.error || 'Could not save RSVP.');
+    state.guest = {
+      ...(state.guest || {}),
+      rsvp: state.attending,
+      adultsComing: adults,
+      kidsComing: kids,
+      message: msg,
+      lastUpdated: data.lastUpdated || 'just now'
+    };
+    saveCachedGuest(state.token, state.guest);
     document.getElementById('rsvpThanks').style.display = 'block';
     document.getElementById('rsvpSubmitBtn').textContent = 'Update RSVP';
     setStatus(`Saved. Last updated: ${data.lastUpdated || 'just now'}.`);
