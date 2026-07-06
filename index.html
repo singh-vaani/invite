@@ -929,6 +929,8 @@ function callApiJsonp(baseUrl){
     }
     window[cb] = (data)=>{ cleanup(); resolve(data); };
     script.onerror = ()=>{ cleanup(); reject(new Error('RSVP service was blocked or could not load. Please try another browser, disable ad blocker, or refresh.')); };
+    script.crossOrigin = 'anonymous';
+    script.referrerPolicy = 'no-referrer';
     script.src = url.toString();
     document.body.appendChild(script);
   });
