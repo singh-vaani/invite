@@ -18,6 +18,7 @@ This project keeps the butterfly invite design and uses a hybrid RSVP backend:
 - Personal invite links use random tokens, not public guest names.
 - Guest info is cached in the browser for 24 hours after a successful lookup.
 - Admin dashboard reads Supabase first and falls back to the Google Sheet.
+- Sheet and Supabase are synced manually/on request when new guests or RSVP differences need to be reconciled.
 
 ## Backend
 
@@ -101,6 +102,8 @@ https://singh-vaani.github.io/invite/?token=aKjRwP
 5. Google Sheet sync runs in the background after the Supabase save.
 6. If Supabase save fails, the invite falls back to saving through Google Apps Script.
 
+This keeps the guest experience fast because Supabase is the live source for reads and writes, while the Google Sheet continues to receive RSVP updates for easy viewing.
+
 ## Admin flow
 
 1. Open `admin.html`.
@@ -108,6 +111,28 @@ https://singh-vaani.github.io/invite/?token=aKjRwP
 3. The dashboard tries Supabase first through `list_invite_guests`.
 4. If Supabase admin results are unavailable, the dashboard falls back to the Google Sheet admin endpoint.
 5. The badge below the controls shows whether the current results came from Supabase live results or Google Sheet fallback.
+
+The admin page should normally show Supabase live results. Use the Google Sheet when you want a familiar table view or when adding/editing guest rows by hand.
+
+## Manual sync flow
+
+There is no automatic two-way sync button in the live site right now.
+
+When new guests are added or the Sheet/Supabase data needs to be compared, sync is done on request:
+
+1. Compare Supabase guests with real guest rows in the Google Sheet.
+2. Ignore blank/formula-only Sheet rows with no host name.
+3. Treat empty pending RSVP counts and zero counts as equivalent.
+4. Copy any new guest rows from the Sheet into Supabase.
+5. Copy any missing RSVP updates from Supabase back into the Google Sheet.
+6. Report the differences before/after syncing.
+
+Current expected flow:
+
+- Add or edit guests in the Google Sheet when you want the easiest manual entry.
+- Ask to sync after adding guests or changing RSVP data by hand.
+- Use the admin page to see the live RSVP summary from Supabase.
+- Keep the Google Sheet as the backup and easy spreadsheet view.
 
 ## Deployment
 
