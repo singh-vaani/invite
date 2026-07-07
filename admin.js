@@ -4,6 +4,7 @@ let rows = [];
 
 function setStatus(msg, error=false){
   const el = document.getElementById('status');
+  if(!el) return;
   el.textContent = msg || '';
   el.style.color = error ? '#9b2f2f' : '';
 }
@@ -94,8 +95,11 @@ function render(data){
   rows = data.guests || [];
   const s = data.summary || {};
   const sourceLabel = data.source === 'supabase' ? 'Supabase live results' : 'Google Sheet fallback';
-  document.getElementById('sourceBadge').textContent = sourceLabel;
-  document.getElementById('sourceBadge').className = `source ${data.source === 'supabase' ? 'live' : 'fallback'}`;
+  const sourceBadge = document.getElementById('sourceBadge');
+  if(sourceBadge){
+    sourceBadge.textContent = sourceLabel;
+    sourceBadge.className = `source ${data.source === 'supabase' ? 'live' : 'fallback'}`;
+  }
   document.getElementById('kpis').innerHTML = [
     kpi('Invited', s.invited || 0), kpi('Viewed', s.viewed || 0), kpi('RSVPs', s.rsvps || 0), kpi('Pending', s.pending || 0),
     kpi('Accepted', s.accepted || 0), kpi('Declined', s.declined || 0), kpi('Adults', s.adults || 0), kpi('Kids', s.kids || 0), kpi('Total Coming', s.totalComing || 0)
