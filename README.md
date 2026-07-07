@@ -17,7 +17,7 @@ This project keeps the butterfly invite design and uses a hybrid RSVP backend:
 - Google Sheet remains the fallback and host-friendly RSVP sheet.
 - Personal invite links use random tokens, not public guest names.
 - Guest info is cached in the browser for 24 hours after a successful lookup.
-- Admin tools continue to use the Google Sheet and private admin key.
+- Admin dashboard reads Supabase first and falls back to the Google Sheet.
 
 ## Backend
 
@@ -28,9 +28,12 @@ Supabase project:
 - Public RPC functions:
   - `get_invite_guest`
   - `save_invite_rsvp`
+  - `list_invite_guests`
 - Schema file: `supabase-setup.sql`
 
 Important: do not put a Supabase service role key or Google admin key in public files. The current `config.js` only contains the publishable Supabase key and the Google Apps Script URL.
+
+The Supabase admin key is stored as a SHA-256 hash in `public.invite_admin_settings`. Run the commented setup statement in `supabase-setup.sql` from Supabase SQL Editor with the real admin key. Do not commit the real key.
 
 ## Google Sheet
 
@@ -97,6 +100,14 @@ https://singh-vaani.github.io/invite/?token=aKjRwP
 4. When a guest submits RSVP, Supabase saves first.
 5. Google Sheet sync runs in the background after the Supabase save.
 6. If Supabase save fails, the invite falls back to saving through Google Apps Script.
+
+## Admin flow
+
+1. Open `admin.html`.
+2. Enter the private admin key.
+3. The dashboard tries Supabase first through `list_invite_guests`.
+4. If Supabase admin results are unavailable, the dashboard falls back to the Google Sheet admin endpoint.
+5. The badge below the controls shows whether the current results came from Supabase live results or Google Sheet fallback.
 
 ## Deployment
 
