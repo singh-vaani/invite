@@ -802,8 +802,8 @@ function butterflySVG(color1, color2){
     ["#f3cad9","#f0b8c8"]
   ];
   const drifts = ['orbitA','orbitB'];
-  // Positioned to flank & hover around Vaani's photo, at varying heights and sizes
-  const spots = [
+  // Mobile keeps the original airy placement; desktop pulls butterflies closer to Vaani's photo.
+  const mobileSpots = [
     {top:'38%', left:'13%', size:30},
     {top:'34%', left:'82%', size:44},
     {top:'54%', left:'6%',  size:40},
@@ -811,6 +811,15 @@ function butterflySVG(color1, color2){
     {top:'74%', left:'16%', size:24},
     {top:'71%', left:'84%', size:36}
   ];
+  const desktopSpots = [
+    {top:'38%', left:'30%', size:30},
+    {top:'36%', left:'66%', size:40},
+    {top:'53%', left:'24%', size:38},
+    {top:'56%', left:'74%', size:26},
+    {top:'73%', left:'32%', size:24},
+    {top:'72%', left:'68%', size:34}
+  ];
+  const spots = window.innerWidth < 640 ? mobileSpots : desktopSpots;
   spots.forEach((pos, i)=>{
     const b = document.createElement('div');
     b.className = 'butterfly';
