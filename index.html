@@ -821,37 +821,56 @@ function butterflySVG(color1, color2){
   ];
   const drifts = ['orbitA','orbitB'];
   const orbitCount = 16;
-  const heroRect = hero.getBoundingClientRect();
-  const photoRect = photo.getBoundingClientRect();
-  const centerX = photoRect.left - heroRect.left + photoRect.width / 2;
-  const centerY = photoRect.top - heroRect.top + photoRect.height / 2;
-  const radiusX = photoRect.width / 2 + 18;
-  const radiusY = photoRect.height / 2 + 14;
   const sizeSteps = [12, 14, 18, 22, 26, 22, 18, 14];
-  const spots = Array.from({ length: orbitCount }, (_, i)=>{
-    const angle = -Math.PI / 2 + (Math.PI * 2 * i / orbitCount);
-    const x = centerX + Math.cos(angle) * radiusX;
-    const y = centerY + Math.sin(angle) * radiusY;
-    return {
-      left: x,
-      top: y,
-      size: sizeSteps[i % 8]
-    };
-  });
-  spots.forEach((pos, i)=>{
-    const b = document.createElement('div');
-    b.className = 'butterfly';
-    b.style.left = (pos.left - pos.size / 2) + 'px';
-    b.style.top = (pos.top - pos.size / 2) + 'px';
-    b.style.width = pos.size+'px';
-    b.style.height = pos.size+'px';
-    const dur = 5.8 + (i % 4) * 0.18;
-    b.style.animation = `${drifts[i%2]} ${dur}s ease-in-out infinite`;
-    b.style.animationDelay = ((i % 8) * 0.12)+'s';
-    const c = palette[i % palette.length];
-    b.innerHTML = butterflySVG(c[0], c[1]);
-    wrap.appendChild(b);
-  });
+  let resizeTimer = null;
+
+  function drawButterflies(){
+    const heroRect = hero.getBoundingClientRect();
+    const photoRect = photo.getBoundingClientRect();
+    const centerX = photoRect.left - heroRect.left + photoRect.width / 2;
+    const centerY = photoRect.top - heroRect.top + photoRect.height / 2;
+    const radiusX = photoRect.width / 2 + 18;
+    const radiusY = photoRect.height / 2 + 14;
+    const spots = Array.from({ length: orbitCount }, (_, i)=>{
+      const angle = -Math.PI / 2 + (Math.PI * 2 * i / orbitCount);
+      const x = centerX + Math.cos(angle) * radiusX;
+      const y = centerY + Math.sin(angle) * radiusY;
+      return {
+        left: x,
+        top: y,
+        size: sizeSteps[i % 8]
+      };
+    });
+
+    wrap.innerHTML = '';
+    spots.forEach((pos, i)=>{
+      const b = document.createElement('div');
+      b.className = 'butterfly';
+      b.style.left = (pos.left - pos.size / 2) + 'px';
+      b.style.top = (pos.top - pos.size / 2) + 'px';
+      b.style.width = pos.size+'px';
+      b.style.height = pos.size+'px';
+      const dur = 5.8 + (i % 4) * 0.18;
+      b.style.animation = `${drifts[i%2]} ${dur}s ease-in-out infinite`;
+      b.style.animationDelay = ((i % 8) * 0.12)+'s';
+      const c = palette[i % palette.length];
+      b.innerHTML = butterflySVG(c[0], c[1]);
+      wrap.appendChild(b);
+    });
+  }
+
+  function scheduleDraw(){
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(drawButterflies, 120);
+  }
+
+  if(document.readyState === 'complete'){
+    drawButterflies();
+  } else {
+    window.addEventListener('load', drawButterflies, { once:true });
+  }
+  window.addEventListener('resize', scheduleDraw, { passive:true });
+  window.addEventListener('orientationchange', scheduleDraw, { passive:true });
 })();
 
 /* ---------- Scroll reveal ---------- */
