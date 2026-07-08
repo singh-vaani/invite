@@ -431,12 +431,12 @@
     align-items:center;
     justify-content:center;
     background:linear-gradient(180deg,var(--sky-top) 0%, var(--sky-mid) 55%, var(--sky-bot) 100%);
-    transition:opacity 1s ease, transform 1.1s ease;
+    transition:opacity 1.45s cubic-bezier(.22,1,.36,1), transform 1.6s cubic-bezier(.22,1,.36,1);
     overflow:hidden;
   }
   .intro-overlay.leaving{
     opacity:0;
-    transform:scale(1.06);
+    transform:scale(1.02);
     pointer-events:none;
   }
   .intro-caption{
@@ -444,18 +444,22 @@
     font-size:clamp(1.6rem,4.5vw,2.4rem);
     color:var(--rose-deep);
     opacity:0;
-    animation:captionPulse 2.6s ease forwards;
+    animation:captionPulse 3.1s cubic-bezier(.22,1,.36,1) forwards;
   }
   @keyframes captionPulse{
-    0%{opacity:0; transform:translateY(8px);}
-    18%{opacity:0.9; transform:translateY(0);}
-    82%{opacity:0.9;}
+    0%{opacity:0; transform:translateY(10px) scale(0.985);}
+    16%{opacity:0.82; transform:translateY(0) scale(1);}
+    84%{opacity:0.82;}
     100%{opacity:0;}
   }
   .swarm-fly{
     position:absolute;
     animation-timing-function:ease-in-out;
     animation-iteration-count:infinite;
+  }
+  #introButterflies .butterfly{
+    will-change:transform, opacity;
+    filter:drop-shadow(0 4px 8px rgba(125,80,110,0.12));
   }
   @keyframes swarmA{
     0%{transform:translate(0,0) rotate(0deg);}
@@ -708,61 +712,72 @@ const CONFIG = Object.assign({
     ["#b9a8d9","#8f77b8"]
   ];
 
-  const cols = window.innerWidth < 640 ? 6 : 9;
-  const rows = window.innerWidth < 640 ? 8 : 6;
+  const isMobile = window.innerWidth < 640;
+  const cols = isMobile ? 5 : 6;
+  const rows = isMobile ? 5 : 5;
   const butterflies = [];
 
   for(let r=0;r<rows;r++){
     for(let c=0;c<cols;c++){
       const baseLeft = (c+0.5)/cols*100;
       const baseTop = (r+0.5)/rows*100;
-      const left = Math.min(97, Math.max(1, baseLeft + (Math.random()-0.5)*7));
-      const top  = Math.min(95, Math.max(2, baseTop  + (Math.random()-0.5)*10));
+      const left = Math.min(96, Math.max(4, baseLeft + (Math.random()-0.5)*(isMobile ? 6 : 8)));
+      const top  = Math.min(94, Math.max(6, baseTop  + (Math.random()-0.5)*(isMobile ? 7 : 10)));
 
       const b = document.createElement('div');
       b.className = 'butterfly';
-      const isLarge = Math.random() < 0.42;
-      const size = isLarge ? (46 + Math.random()*34) : (16 + Math.random()*20);
+      const sizeRoll = Math.random();
+      const size = sizeRoll < 0.28
+        ? (isMobile ? (12 + Math.random()*8) : (14 + Math.random()*10))
+        : sizeRoll < 0.74
+          ? (isMobile ? (20 + Math.random()*12) : (24 + Math.random()*14))
+          : (isMobile ? (32 + Math.random()*18) : (40 + Math.random()*28));
       b.style.width = size+'px';
       b.style.height = size+'px';
       b.style.left = left+'%';
       b.style.top = top+'%';
       b.style.opacity = '0';
-      b.style.transform = 'scale(0.35)';
-      b.style.transition = 'opacity 0.5s ease, transform 0.5s cubic-bezier(.4,0,.2,1)';
+      b.style.transform = 'scale(0.25)';
+      b.style.transition = 'opacity 1.05s ease, transform 1.28s cubic-bezier(.22,1,.36,1)';
 
       const c2 = palette[(r*cols+c) % palette.length];
       b.innerHTML = butterflySVG(c2[0], c2[1]);
       wrap.appendChild(b);
 
       const dist = Math.hypot(left-50, top-50) / 70; // ~0 to 1
-      butterflies.push({ el:b, group: baseLeft <= 50 ? -1 : 1, delay: dist*380 + Math.random()*150 });
+      butterflies.push({
+        el:b,
+        left,
+        top,
+        delay: dist*520 + Math.random()*180
+      });
     }
   }
 
-  // Phase 1: pop in, rippling out from the center
+  // Phase 1: bloom in gently, then pull inward toward the center
   butterflies.forEach(({el, delay})=>{
     setTimeout(()=>{
       el.style.opacity = '1';
-      el.style.transform = 'scale(1)';
+      el.style.transform = 'scale(0.96)';
     }, delay);
   });
 
-  // Phase 2: after holding as a full "curtain", split apart left/right
-  const splitStart = 1250;
+  // Phase 2: drift toward the center and settle there before the page reveals
+  const splitStart = 1450;
   setTimeout(()=>{
-    butterflies.forEach(({el, group}, i)=>{
-      const ty = (Math.random()*50-25); // vh drift
-      const rot = group * (12 + Math.random()*18);
-      const extraDelay = Math.random()*140;
-      el.style.transition = `transform 1.05s cubic-bezier(.5,0,.5,1) ${extraDelay}ms, opacity 0.9s ease ${extraDelay}ms`;
-      el.style.transform = `translate(${group*145}vw, ${ty}vh) rotate(${rot}deg) scale(0.9)`;
-      el.style.opacity = '0';
+    butterflies.forEach(({el, left, top}, i)=>{
+      const toCenterX = (50 - left) * (isMobile ? 0.45 : 0.38);
+      const toCenterY = (50 - top) * (isMobile ? 0.45 : 0.38);
+      const extraDelay = Math.random()*110;
+      const settle = i % 4 === 0 ? 0.62 : (i % 4 === 1 ? 0.7 : 0.76);
+      el.style.transition = `transform 2.4s cubic-bezier(.22,1,.36,1) ${extraDelay}ms, opacity 1.4s ease ${extraDelay}ms`;
+      el.style.transform = `translate(${toCenterX}vw, ${toCenterY}vh) rotate(${(i % 2 ? -1 : 1) * (4 + i % 5)}deg) scale(${settle})`;
+      el.style.opacity = i % 5 === 0 ? '0.55' : '0.42';
     });
   }, splitStart);
 
   // Cleanup
-  setTimeout(()=> overlay.remove(), splitStart + 1300);
+  setTimeout(()=> overlay.remove(), splitStart + 2600);
 })();
 
 
@@ -795,6 +810,9 @@ function butterflySVG(color1, color2){
 }
 (function(){
   const wrap = document.getElementById('butterflies');
+  const photo = document.querySelector('.photo-wrap');
+  const hero = document.getElementById('hero');
+  if(!wrap || !photo || !hero) return;
   const palette = [
     ["#c9a7e0","#a993c9"],
     ["#f0b8c8","#e6a3ba"],
@@ -802,34 +820,34 @@ function butterflySVG(color1, color2){
     ["#f3cad9","#f0b8c8"]
   ];
   const drifts = ['orbitA','orbitB'];
-  // Mobile keeps the original airy placement; desktop pulls butterflies closer to Vaani's photo.
-  const mobileSpots = [
-    {top:'38%', left:'13%', size:30},
-    {top:'34%', left:'82%', size:44},
-    {top:'54%', left:'6%',  size:40},
-    {top:'58%', left:'91%', size:26},
-    {top:'74%', left:'16%', size:24},
-    {top:'71%', left:'84%', size:36}
-  ];
-  const desktopSpots = [
-    {top:'38%', left:'30%', size:30},
-    {top:'36%', left:'66%', size:40},
-    {top:'53%', left:'24%', size:38},
-    {top:'56%', left:'74%', size:26},
-    {top:'73%', left:'32%', size:24},
-    {top:'72%', left:'68%', size:34}
-  ];
-  const spots = window.innerWidth < 640 ? mobileSpots : desktopSpots;
+  const orbitCount = 16;
+  const heroRect = hero.getBoundingClientRect();
+  const photoRect = photo.getBoundingClientRect();
+  const centerX = photoRect.left - heroRect.left + photoRect.width / 2;
+  const centerY = photoRect.top - heroRect.top + photoRect.height / 2;
+  const radiusX = photoRect.width / 2 + 18;
+  const radiusY = photoRect.height / 2 + 14;
+  const sizeSteps = [14, 16, 18, 20, 18, 16, 14, 16];
+  const spots = Array.from({ length: orbitCount }, (_, i)=>{
+    const angle = -Math.PI / 2 + (Math.PI * 2 * i / orbitCount);
+    const x = centerX + Math.cos(angle) * radiusX;
+    const y = centerY + Math.sin(angle) * radiusY;
+    return {
+      left: x,
+      top: y,
+      size: sizeSteps[i % 8]
+    };
+  });
   spots.forEach((pos, i)=>{
     const b = document.createElement('div');
     b.className = 'butterfly';
-    b.style.top = pos.top;
-    b.style.left = pos.left;
+    b.style.left = (pos.left - pos.size / 2) + 'px';
+    b.style.top = (pos.top - pos.size / 2) + 'px';
     b.style.width = pos.size+'px';
     b.style.height = pos.size+'px';
-    const dur = 5 + Math.random()*2.5;
+    const dur = 5.8 + (i % 4) * 0.18;
     b.style.animation = `${drifts[i%2]} ${dur}s ease-in-out infinite`;
-    b.style.animationDelay = (Math.random()*2)+'s';
+    b.style.animationDelay = ((i % 8) * 0.12)+'s';
     const c = palette[i % palette.length];
     b.innerHTML = butterflySVG(c[0], c[1]);
     wrap.appendChild(b);

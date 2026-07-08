@@ -15,7 +15,7 @@ main{max-width:1120px;margin:0 auto;padding:0 16px 48px}.card{background:var(--c
 </style>
 </head>
 <body>
-<header><div class="sub">Host Dashboard</div><h1>Vaani Invite Admin</h1><p>Private RSVP summary from Supabase with Google Sheet fallback</p></header>
+<header><div class="sub">Host Dashboard</div><h1>Vaani Invite Admin</h1><p>Enter the password to view RSVP details.</p></header>
 <main>
   <section class="card">
     <div class="controls">
@@ -24,12 +24,14 @@ main{max-width:1120px;margin:0 auto;padding:0 16px 48px}.card{background:var(--c
       <button class="btn secondary" id="csvBtn" disabled>Download CSV</button>
     </div>
     <div class="status" id="status"></div>
-    <div class="source" id="sourceBadge"></div>
   </section>
-  <section class="grid" id="kpis"></section>
-  <section class="card">
-    <input class="search" id="search" placeholder="Search by name, phone, RSVP, token..." />
-    <div class="table-wrap"><table id="guestTable"></table></div>
+  <section id="dashboard" hidden>
+    <section class="grid" id="kpis"></section>
+    <section class="card">
+      <div class="source" id="sourceBadge"></div>
+      <input class="search" id="search" placeholder="Search by name, phone, RSVP, token..." />
+      <div class="table-wrap"><table id="guestTable"></table></div>
+    </section>
   </section>
 </main>
 <script src="config.js?v=20260707-admin-supabase"></script>

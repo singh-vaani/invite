@@ -1,12 +1,18 @@
 
 const CONFIG = window.INVITE_CONFIG || {};
 let rows = [];
+const DASHBOARD_KEY = 'vaaniAdminUnlocked';
 
 function setStatus(msg, error=false){
   const el = document.getElementById('status');
   if(!el) return;
   el.textContent = msg || '';
   el.style.color = error ? '#9b2f2f' : '';
+}
+
+function setDashboardVisible(visible){
+  const el = document.getElementById('dashboard');
+  if(el) el.hidden = !visible;
 }
 
 function supabaseEnabled(){
@@ -116,12 +122,22 @@ function esc(v){ return String(v ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<
 
 document.getElementById('loadBtn').addEventListener('click', async()=>{
   const adminKey = document.getElementById('adminKey').value || CONFIG.adminKey;
+  if(!String(adminKey || '').trim()){
+    setStatus('Enter the admin password to view the dashboard.', true);
+    setDashboardVisible(false);
+    return;
+  }
   setStatus('Loading...');
   try{
     const data = await loadDashboard(adminKey);
+    setDashboardVisible(true);
+    try{ sessionStorage.setItem(DASHBOARD_KEY, '1'); }catch(_err){}
     render(data);
     setStatus(`Dashboard loaded from ${data.source === 'supabase' ? 'Supabase' : 'Google Sheet'}.`);
-  }catch(err){ setStatus(err.message, true); }
+  }catch(err){
+    setDashboardVisible(false);
+    setStatus(err.message, true);
+  }
 });
 
 document.getElementById('search').addEventListener('input', e=>{
@@ -136,3 +152,9 @@ document.getElementById('csvBtn').addEventListener('click', ()=>{
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href=url; a.download='vaani-rsvps.csv'; a.click(); URL.revokeObjectURL(url);
 });
+
+try{
+  if(sessionStorage.getItem(DASHBOARD_KEY) === '1'){
+    setDashboardVisible(true);
+  }
+}catch(_err){}
