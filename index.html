@@ -827,7 +827,7 @@ function butterflySVG(color1, color2){
   const centerY = photoRect.top - heroRect.top + photoRect.height / 2;
   const radiusX = photoRect.width / 2 + 18;
   const radiusY = photoRect.height / 2 + 14;
-  const sizeSteps = [14, 16, 18, 20, 18, 16, 14, 16];
+  const sizeSteps = [12, 14, 18, 22, 26, 22, 18, 14];
   const spots = Array.from({ length: orbitCount }, (_, i)=>{
     const angle = -Math.PI / 2 + (Math.PI * 2 * i / orbitCount);
     const x = centerX + Math.cos(angle) * radiusX;
