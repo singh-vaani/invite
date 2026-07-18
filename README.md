@@ -6,7 +6,6 @@ Live site:
 
 Example personal invite:
 
-- https://singh-vaani.github.io/invite/?token=aKjRwP
 
 ## Current setup
 
